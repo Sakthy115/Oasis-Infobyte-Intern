@@ -1,0 +1,68 @@
+Install libraries
+       pip install speechrecognition pyttsx3 pywhatkit
+
+Implementation
+
+import speech_recognition as sr
+import pyttsx3
+import pywhatkit
+from datetime import datetime
+
+class VoiceAssistant:
+    def __init__(self):
+        self.recognizer = sr.Recognizer()
+        self.tts_engine = pyttsx3.init()
+
+    def speak(self, text):
+        """Converts text to speech."""
+        self.tts_engine.say(text)
+        self.tts_engine.runAndWait()
+
+    def listen(self):
+        """Listens to the user's command and returns the recognized text."""
+        with sr.Microphone() as source:
+            print("Listening...")
+            audio = self.recognizer.listen(source)
+            try:
+                command = self.recognizer.recognize_google(audio)
+                print(f"You said: {command}")
+                return command.lower()
+            except sr.UnknownValueError:
+                self.speak("Sorry, I did not understand that.")
+            except sr.RequestError:
+                self.speak("Sorry, there seems to be an issue with the service.")
+            return ""
+
+    def process_command(self, command):
+        """Processes the recognized command and responds accordingly."""
+        if "hello" in command:
+            self.speak("Hello! How can I help you?")
+        elif "your name" in command:
+            self.speak("I am your voice assistant.")
+        elif "time" in command:
+            now = datetime.now().strftime("%H:%M")
+            self.speak(f"The time is {now}.")
+        elif "date" in command:
+            today = datetime.now().strftime("%B %d, %Y")
+            self.speak(f"Today's date is {today}.")
+        elif "search for" in command:
+            search_query = command.replace("search for", "").strip()
+            self.speak(f"Searching the web for {search_query}")
+            pywhatkit.search(search_query)
+        elif "exit" in command or "quit" in command:
+            self.speak("Goodbye!")
+            exit()
+        else:
+            self.speak("I didn't catch that. Can you please repeat?")
+
+    def run(self):
+        """Runs the voice assistant."""
+        self.speak("How can I assist you?")
+        while True:
+            command = self.listen()
+            if command:
+                self.process_command(command)
+
+if __name__ == "__main__":
+    assistant = VoiceAssistant()
+    assistant.run()
